@@ -13,13 +13,13 @@ class Main(Scene):
         self.camera.background_color = OFFWHITE
 
         # TEXT EXAMPLE
-        blue = Circle(radius=0.25, color = OFFBLACK, fill_color = BLUE, fill_opacity = 0.9)
-        green = Circle(radius=0.25, color = OFFBLACK, fill_color = GREEN, fill_opacity = 0.9)
-        red = Circle(radius=0.25, color = OFFBLACK, fill_color = RED, fill_opacity = 0.9)
-        yellow = Circle(radius=0.25, color = OFFBLACK, fill_color = YELLOW, fill_opacity = 0.9)
-        orange = Circle(radius=0.25, color = OFFBLACK, fill_color = ORANGE, fill_opacity = 0.9)
-        purple = Circle(radius=0.25, color = OFFBLACK, fill_color = PURPLE, fill_opacity = 0.9)
-        black = Circle(radius=0.25, color = OFFBLACK, fill_color = OFFBLACK, fill_opacity = 0.9)
+        blue = Text("blue", color = OFFBLACK)
+        green = Text("green", color = OFFBLACK)
+        red = Text("red", color = OFFBLACK)
+        yellow = Text("yellow", color = OFFBLACK)
+        orange = Text("orange", color = OFFBLACK)
+        purple = Text("purple", color = OFFBLACK)
+        black = Text("black", color = OFFBLACK)
 
         tree = TreeController(blue)
         tree.insert(green, [0])
@@ -28,7 +28,11 @@ class Main(Scene):
         tree.insert(orange, [0, 1])
         tree.insert(purple, [1, 0])
         tree.insert(black, [1, 0, 0])
-        tree.autoPosition(vertical_spacing = 0.1)
+
+        # setting the position and shit
+        tree.mobject.shift(3*UP)
+        tree.autoPosition(v=1, h=0.5)
+        tree.addEdges(color = OFFBLACK)
 
         self.play(Write(tree.mobject))
 

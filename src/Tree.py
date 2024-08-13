@@ -1,13 +1,16 @@
 from manim import *
 
-
-# Each subtree gets a horizontal span that depends on the number of leaves it has
+# THIS CREATES A STATIC TREE
+# THERE ARE NO INSERTION ANIMATIONS
+# THE EDGES ARE NOT UPDATED TO ATTACH TO THE NDOES
 
 class Subtree:
     def __init__(self, mobject : VMobject):
         self.root_mobject : VMobject = mobject
         self.mobject : VGroup = VGroup(mobject)
         self.children : List[Subtree] = []
+        self.parent : Subtree = None
+        self.edge_to_parent : Line = None
 
     def height(self) -> float:
         return self.mobject.get_height()
@@ -31,6 +34,7 @@ class Subtree:
             print("ERROR: INDEX OUT OF RANGE")
         elif len(path) == 1:
             newitem = Subtree(item)
+            newitem.parent = self
             self.children.insert(path[0], newitem)
             self.mobject.add(newitem.mobject)
         else:
@@ -46,31 +50,34 @@ class Subtree:
             
             # find the widths of all the children
             childCount = len(self.children)
-            childWidths = []
-            childWidthSum = 0
+            child_widths = []
+            child_width_sum = 0
             for c in self.children:
-                childWidths.append(c.mobject.get_width())
-                childWidthSum += c.mobject.get_width()
+                child_widths.append(c.mobject.get_width())
+                child_width_sum += c.mobject.get_width()
             
             # use these to find the positions relative to the parent
             # such that the parent is in the centre
-            totalWidth = (childCount - 1) * h + childWidthSum
-            currLeftBorder = -totalWidth/2
+            total_width = (childCount - 1) * h + child_width_sum
+            curr_left_border = -total_width/2
             subtreePositions = []
-            for w in childWidths:
-                subtreePositions.append(currLeftBorder + w/2)
-                currLeftBorder += h + w
+            for w in child_widths:
+                subtreePositions.append(curr_left_border + w/2)
+                curr_left_border += h + w
 
             # now position the children relative to the parent
             for p, c in zip(subtreePositions, self.children):
                 height = c.height()
                 c.mobject.move_to(self.root_mobject.get_bottom() + DOWN*height/2 + v*DOWN + p*RIGHT)
 
+    
+
 class TreeController:
     def __init__(self, root : VMobject):
         self.root = Subtree(root)
         # the thing that is actually displayed
-        self.mobject = self.root.mobject
+        self.mobject : VMobject = self.root.mobject
+        self.all : List[Subtree] = [self.root]
 
     # NON-ANIMATION METHODS
 
@@ -79,12 +86,24 @@ class TreeController:
 
     def insert(self, item : VMobject, path : List[int]):
         self.root.insert(item, path)
+        self.all.append(self.subtree(path))
 
     def autoPosition(self, **kwargs):
-        v = kwargs.get("vertical_spacing", 1)
-        h = kwargs.get("horizontal_buffer", 0.1)
+        v = kwargs.get("v", 0.5)
+        h = kwargs.get("h", 0.2)
         self.root.autoPosition(v, h)
 
-    # ANIMTION METHODS (returns an animation object)
+    def addEdges(self, **kwargs):
+        for st in self.all:
+            if st.parent != None:
+                edge = Line(
+                    st.parent.root_mobject.get_bottom(),
+                    st.root_mobject.get_top(), 
+                    **kwargs
+                )
+                st.parent.mobject.add(edge)
+                st.edge_to_parent = edge
 
+                # we want to shorten
 
+                edge.scale(0.6)
