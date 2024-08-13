@@ -47,23 +47,24 @@ class Subtree:
             # find the widths of all the children
             childCount = len(self.children)
             childWidths = []
-            totalWidth = 0
+            childWidthSum = 0
             for c in self.children:
                 childWidths.append(c.mobject.get_width())
-                totalWidth += c.mobject.get_width()
+                childWidthSum += c.mobject.get_width()
             
             # use these to find the positions relative to the parent
             # such that the parent is in the centre
-            total_width = childCount 
-            
-            # now position the children relative to the parent
-            counter = 0
-            for c in self.children:
-                width = c.width()
-                height = c.height()
-                c.mobject.move_to(self.root_mobject.get_bottom() + DOWN*height/2 + v*DOWN + counter*RIGHT)
-                counter += 1
+            totalWidth = (childCount - 1) * h + childWidthSum
+            currLeftBorder = -totalWidth/2
+            subtreePositions = []
+            for w in childWidths:
+                subtreePositions.append(currLeftBorder + w/2)
+                currLeftBorder += h + w
 
+            # now position the children relative to the parent
+            for p, c in zip(subtreePositions, self.children):
+                height = c.height()
+                c.mobject.move_to(self.root_mobject.get_bottom() + DOWN*height/2 + v*DOWN + p*RIGHT)
 
 class TreeController:
     def __init__(self, root : VMobject):
